@@ -1,0 +1,10 @@
+# eclipse project folder
+.project
+.pydevproject
+
+# files which are holding sensible information
+settings.py
+settings.pyc
+
+
+
