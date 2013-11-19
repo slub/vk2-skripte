@@ -231,7 +231,17 @@ def createUpdateProcess(timestamp, layerid, database):
         'timestamp': timestamp,
         'layerid': layerid
 })
-    
+
+def runUpdateProcess(timestamp, layerid, database):
+    try:
+        updateProcess = createUpdateProcess(timestamp, layerid, database)
+        updateProcess.updateTimeCoverage()
+    except IntegrityError,e :
+        print(e)
+        print('A update process for this virtual datasets is already running!')
+        pass
+
+      
 def parseCommandLine():
     parser = argparse.ArgumentParser(description='Parse the key/value pairs from the command line!')
     parser.add_argument('-modus', type=str, help='Run update in full or reduced mode')
@@ -244,10 +254,8 @@ if __name__ == '__main__':
 
     if args.modus == 'full':
         for timestamp in range(1868,1946):
-            updateProcess = createUpdateProcess(timestamp, params_mtbs['layerid'], database)
-            updateProcess.updateTimeCoverage()
+            runUpdateProcess(timestamp, params_mtbs['layerid'], database)
     elif args.modus == 'reduced':
         toUpdatedTimestampList = getTimestampListForUpdate(database)
         for timestamp in toUpdatedTimestampList:
-            updateProcess = createUpdateProcess(timestamp, params_mtbs['layerid'], database)
-            updateProcess.updateTimeCoverage()            
+            runUpdateProcess(timestamp, params_mtbs['layerid'], database)
