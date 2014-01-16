@@ -1,0 +1,210 @@
+'''
+Created on Jan 9, 2014
+
+@author: mendt
+'''
+import xml.etree.ElementTree as ET
+import copy
+from src.csw.Namespaces import Namespaces
+
+class ChildMetadataBinding(object):
+    '''
+    This class encapsulate the functions which are bind to a metadata template document for a messtischblatt. 
+    Especially that are the update functions for the different metadata elements.
+    '''
+
+    def __init__(self, srcFile, logger):
+        self.__registerNamespaces__()       
+        self.srcFile = srcFile
+        self.tree = ET.parse(srcFile)
+        self.root = self.tree.getroot()
+        self.logger = logger
+    
+    def __getCharacterStringElement__(self, element):
+        return element.find(self.ns['gco']+'CharacterString')
+
+    def __getChildElement__(self, parentElementId, childElementId):
+        for parentElement in self.root.iter(parentElementId):
+            for element in parentElement.iter(childElementId):
+                return element
+            
+    def __registerNamespaces__(self):
+        # inits the namespace
+        self.ns = Namespaces
+        # Helper method which define the prefix of the namespaces
+        for key in self.ns:
+            ET.register_namespace(key, self.ns[key].strip('}').strip('{'))
+            
+    def __changeSingleElement__(self, value, path):
+        valueElement = self.root.find(path)
+        valueElement.text = value
+        return True
+    
+    def saveFile(self, destFile):
+        self.tree.write(destFile, encoding="utf-8", xml_declaration=True)
+        return destFile
+
+    def updateAbstract(self, value):
+        try:
+            self.logger.debug('Update <gmd:abstract> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'abstract',
+                             self.ns['gco']+'CharacterString']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))     
+            return True      
+        except:
+            self.logger.error('Problems while updating the <gmd:abstract> with value %s.'%value)
+            raise
+
+    def updateBoundingBox(self, westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude):
+        try:
+            self.logger.debug('Update <gmd:EX_TemporalExtent> with westBoundLongitude %s, eastBoundLongitude %s, southBoundLatitude %s and northBoundLatitude %s.'%(
+                westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude))
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'extent',
+                             self.ns['gmd']+'EX_Extent',
+                             self.ns['gmd']+'geographicElement',
+                             self.ns['gmd']+'EX_GeographicBoundingBox']            
+            # set westBoundLongitude
+            westBoundLonHierarchy = copy.deepcopy(xmlHierarchy)
+            westBoundLonHierarchy.extend([self.ns['gmd']+'westBoundLongitude',
+                                          self.ns['gco']+'Decimal'])
+            self.__changeSingleElement__(westBoundLongitude,'/'.join(westBoundLonHierarchy))
+                
+            # set eastBoundLongitutde
+            eastBoundLonHierarchy = copy.deepcopy(xmlHierarchy)
+            eastBoundLonHierarchy.extend([self.ns['gmd']+'eastBoundLongitude',
+                                          self.ns['gco']+'Decimal'])
+            self.__changeSingleElement__(eastBoundLongitude,'/'.join(eastBoundLonHierarchy))
+            
+            # set southBoundLatitude
+            southBoundLatHierarchy = copy.deepcopy(xmlHierarchy)
+            southBoundLatHierarchy.extend([self.ns['gmd']+'southBoundLatitude',
+                                          self.ns['gco']+'Decimal'])
+            self.__changeSingleElement__(southBoundLatitude,'/'.join(southBoundLatHierarchy))            
+                
+            # set northBoundLatitude
+            northBoundLatHierarchy = copy.deepcopy(xmlHierarchy)
+            northBoundLatHierarchy.extend([self.ns['gmd']+'northBoundLatitude',
+                                          self.ns['gco']+'Decimal'])
+            self.__changeSingleElement__(northBoundLatitude,'/'.join(northBoundLatHierarchy))   
+                
+            return True
+        except:  
+            self.logger.error('Problems while updating the <gmd:EX_TemporalExtent> with westBoundLongitude %s, eastBoundLongitude %s, southBoundLatitude %s and northBoundLatitude %s.'%(
+                westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude))
+            raise     
+                    
+    def updateDateStamp(self, value):
+        try:
+            self.logger.debug('Update <gmd:dateStamp> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'dateStamp', 
+                             self.ns['gco']+'Date']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))
+            return True      
+        except:
+            self.logger.error('Problems while updating the <gmd:dateStamp> with value %s.'%value)
+            raise
+        
+    def updateHierarchyLevelName(self, value):
+        try:
+            self.logger.debug('Update <gmd:hierarchyLevelName> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'hierarchyLevelName', 
+                             self.ns['gco']+'CharacterString']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))
+            return True      
+        except:
+            self.logger.error('Problems while updating the <gmd:hierarchyLevelName> with value %s.'%value)
+            raise
+        
+    def updateId(self, value):
+        try:
+            self.logger.debug('Update <gmd:fileIdentifier> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'fileIdentifier', 
+                             self.ns['gco']+'CharacterString']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))
+            return True
+        except:
+            self.logger.error('Problems while updating the <gmd:fileIdentifier> with value %s.'%value)
+            raise
+        
+    def updatePermalink(self, value):
+        try: 
+            self.logger.debug('Update <gmd:MD_DigitalTransferOptions')
+            xmlHierarchy = [self.ns['gmd']+'distributionInfo', 
+                             self.ns['gmd']+'MD_Distribution',
+                             self.ns['gmd']+'transferOptions',
+                             self.ns['gmd']+'MD_DigitalTransferOptions',
+                             self.ns['gmd']+'onLine',
+                             self.ns['gmd']+'CI_OnlineResource',
+                             self.ns['gmd']+'linkage',
+                             self.ns['gmd']+'URL']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))
+            return True
+        except:
+            self.logger.error('Problems while updating the <gmd:MD_DigitalTransferOptions> with value %s.'%value)
+            raise
+        
+    def updateTitle(self, value):
+        try:
+            self.logger.debug('Update <gmd:title> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'citation',
+                             self.ns['gmd']+'CI_Citation',
+                             self.ns['gmd']+'title',
+                             self.ns['gco']+'CharacterString']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))            
+            return True
+        except:
+            self.logger.error('Problems while updating the <gmd:title> with value %s.'%value)
+            raise    
+        
+    def updateReferenceDate(self, value):
+        try:
+            self.logger.debug('Update <gmd:CI_Date> with value %s.'%value)
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'citation',
+                             self.ns['gmd']+'CI_Citation',
+                             self.ns['gmd']+'date',
+                             self.ns['gmd']+'CI_Date',
+                             self.ns['gmd']+'date',
+                             self.ns['gco']+'Date']
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))    
+            return True      
+        except:
+            self.logger.error('Problems while updating the <gmd:CI_Date> with value %s.'%value)
+            raise   
+    
+    def updateReferenceTime(self, startValue, endValue):
+        try:
+            self.logger.debug('Update <gmd:extent> with startValue %s and endValue %s.'%(startValue, endValue))
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'extent',
+                             self.ns['gmd']+'EX_Extent',
+                             self.ns['gmd']+'temporalElement',
+                             self.ns['gmd']+'EX_TemporalExtent',
+                             self.ns['gmd']+'extent',
+                             self.ns['gml']+'TimePeriod']            
+            # set begin
+            beginPeriodHierarchy = copy.deepcopy(xmlHierarchy)
+            beginPeriodHierarchy.extend([self.ns['gml']+'begin',
+                            self.ns['gml']+'TimeInstant',
+                            self.ns['gml']+'timePosition'])
+            self.__changeSingleElement__(startValue,'/'.join(beginPeriodHierarchy))
+                
+            # set end
+            endPeriodHierarchy = copy.deepcopy(xmlHierarchy)
+            endPeriodHierarchy.extend([self.ns['gml']+'end',
+                            self.ns['gml']+'TimeInstant',
+                            self.ns['gml']+'timePosition'])
+            self.__changeSingleElement__(endValue,'/'.join(endPeriodHierarchy))
+            return True
+        except:  
+            self.logger.error('Problems while updating the <gmd:extent> with startValue %s and endValue %s.'%(startValue, endValue))    
+            raise      
+                    
