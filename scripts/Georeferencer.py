@@ -30,8 +30,12 @@
 # * DEALINGS IN THE SOFTWARE.
 # ****************************************************************************/
 
-import sys, os, logging
+import sys, os, logging, argparse
 from sqlalchemy.exc import IntegrityError
+
+# set path of the project directory for finding the correct modules
+sys.path.insert(0, os.path.abspath('..'))
+
 from settings import sqlalchemy_engine, georef_settings
 from src.models.Meta import initializeDb
 from src.models.Georeferenzierungsprozess import Georeferenzierungsprozess
@@ -41,8 +45,7 @@ from src.csw.InsertMetadata import insertMetadata
 from src.georef.georeferenceprocess import GeoreferenceProcessManager
 from src.utils.Exceptions import GeoreferenceProcessNotFoundError, GeoreferenceProcessingError
 
-# set path of the project directory for finding the correct modules
-sys.path.insert(0, os.path.abspath('..'))
+
 
 def getGeoreferenceProcess(dbsession, logger):
     responseProcess = []
@@ -131,9 +134,25 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     dbsession = initializeDb(sqlalchemy_engine)
     logger = logging.getLogger('sqlalchemy.engine')
+   
+    # parse command line
+    parser = argparse.ArgumentParser(description='Parse the key/value pairs from the command line!')
+    parser.add_argument('-modus', type=str, help='Run in testing or production modus')
+    arguments = parser.parse_args()
     
-    georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
-    for process in georefProcessQueue:
-        registerGeoreferenceMesstischblatt(georeference_process = process[0], 
-            messtischblatt = process[1], dbsession = dbsession, logger = logger)
+    
+    if arguments.modus == 'production':
+        print 'Running script in modus "%s"'%arguments.modus
+        georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
+        for process in georefProcessQueue:
+            registerGeoreferenceMesstischblatt(georeference_process = process[0], 
+                messtischblatt = process[1], dbsession = dbsession, logger = logger)
+        dbsession.commit()
+    else:
+        print 'Running script in modus "Testing"'
+        georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
+        for process in georefProcessQueue:
+            registerGeoreferenceMesstischblatt(georeference_process = process[0], 
+                messtischblatt = process[1], dbsession = dbsession, logger = logger)
+ 
     
