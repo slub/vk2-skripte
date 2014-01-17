@@ -9,3 +9,5 @@ settings.pyc
 # all files with ending 
 *.pyc
 
+# don't log further changes in metadata-template
+/metadaten-templates

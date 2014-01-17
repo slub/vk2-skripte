@@ -51,6 +51,10 @@ class Messtischblatt(Base):
         return Page([{'mtbid':1},{'mtbid':2},{'mtbid':3},{'mtbid':4}], page, url=page_url, items_per_page=10)
         #return Page(Messtischblatt.all(), page, url=page_url, items_per_page=10)
     
+    @classmethod
+    def getUntransformed(cls, session):
+        return session.query(Messtischblatt).filter(Messtischblatt.isttransformiert == False).order_by(desc(Messtischblatt.id))
+    
     @property
     def slug(self):
         return urlify(self.dateiname)
