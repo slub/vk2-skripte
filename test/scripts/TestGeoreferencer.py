@@ -3,8 +3,12 @@ Created on Jan 16, 2014
 
 @author: mendt
 '''
-import unittest
-import logging
+import unittest, logging, sys, os
+
+# set path of the project directory for finding the correct modules
+parentPath = os.path.abspath('..')
+sys.path.insert(0, parentPath)
+
 from settings import sqlalchemy_engine, georef_settings, gn_settings
 from scripts.Georeferencer import getGeoreferenceProcess, computeGeoreferenceResult, updateDatabase, registerGeoreferenceMesstischblatt
 from src.csw.CswTransactionBinding import gn_transaction_delete
@@ -13,6 +17,7 @@ from src.models.Georeferenzierungsprozess import Georeferenzierungsprozess
 from src.models.Messtischblatt import Messtischblatt
 from src.models.RefMtbLayer import RefMtbLayer
 from src.georef.georeferenceprocess import GeoreferenceProcessManager
+from src.utils.Exceptions import GeoreferenceProcessNotFoundError
 
 class TestGeoreferencer(unittest.TestCase):
     
@@ -40,11 +45,14 @@ class TestGeoreferencer(unittest.TestCase):
             self.assertIsNotNone(response, 'Function testGetGeoreferenceProcess - Response is None but not expected.')
             self.assertTrue(len(response) > 0, 'Function testGetGeoreferenceProcess - No response object.')
             self.assertTrue(isinstance(response[0][0], Georeferenzierungsprozess), \
-                             'Function testGetGeoreferenceProcess - Expected a object from typ <Georeferenzierungsprozess>, but failed.')
+                                 'Function testGetGeoreferenceProcess - Expected a object from typ <Georeferenzierungsprozess>, but failed.')
             self.assertTrue(isinstance(response[0][1], Messtischblatt), \
-                             'Function testGetGeoreferenceProcess - Expected a object from typ <Messtischblatt>, but failed.')
-        except:
-            raise
+                                 'Function testGetGeoreferenceProcess - Expected a object from typ <Messtischblatt>, but failed.')
+        except Exception as e:
+            self.assertTrue(isinstance(e, GeoreferenceProcessNotFoundError), 'Function testGetGeoreferenceProcess - \
+                Doesn\'t return a GeoreferenceProcessNotFoundErrpr.')
+            if not isinstance(e, GeoreferenceProcessNotFoundError):
+                raise
         finally:
             self.deleteDummyGeorefProcess(georefid)
         

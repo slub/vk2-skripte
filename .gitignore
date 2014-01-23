@@ -11,3 +11,6 @@ settings.pyc
 
 # don't log further changes in metadata-template
 /metadaten-templates
+
+# database information
+/db

@@ -35,6 +35,7 @@ from sqlalchemy.exc import IntegrityError
 
 # set path of the project directory for finding the correct modules
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.append(os.path.abspath('.'))
 
 from settings import sqlalchemy_engine, georef_settings
 from src.models.Meta import initializeDb
@@ -44,8 +45,6 @@ from src.models.RefMtbLayer import RefMtbLayer
 from src.csw.InsertMetadata import insertMetadata
 from src.georef.georeferenceprocess import GeoreferenceProcessManager
 from src.utils.Exceptions import GeoreferenceProcessNotFoundError, GeoreferenceProcessingError
-
-
 
 def getGeoreferenceProcess(dbsession, logger):
     responseProcess = []

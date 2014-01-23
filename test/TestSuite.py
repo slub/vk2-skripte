@@ -13,6 +13,7 @@ import unittest, sys, os
 # set path of the project directory for finding the correct modules
 parentPath = os.path.abspath('.')
 sys.path.insert(0, parentPath)
+sys.path.insert(0, os.path.abspath('..'))
 
 from test.src.models.TestMeta import TestMeta
 from test.scripts.TestGeoreferencer import TestGeoreferencer
