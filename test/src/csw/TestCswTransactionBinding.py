@@ -12,7 +12,7 @@ from src.csw.CswTransactionBinding import gn_auth_logout, gn_auth_login, gn_tran
 from src.csw.InsertMetadata import createTemporaryCopy, getMetadataForMesstischblatt, updateMetadata
 
 
-class Test(unittest.TestCase):
+class TestCswTransactionBinding(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

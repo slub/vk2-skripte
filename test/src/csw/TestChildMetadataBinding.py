@@ -13,7 +13,7 @@ import shutil
 import os
 from datetime import datetime
 from settings import sqlalchemy_engine, templates
-from src.csw.InsertMetadata import createMetadataFile
+from src.csw.InsertMetadata import createTemporaryCopy
 from src.csw.ChildMetadataBinding import ChildMetadataBinding
 
 class TestChildMetadataBinding(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestChildMetadataBinding(unittest.TestCase):
 
     def testInitChildMetadataBinding(self):
         try:
-            mdFile = createMetadataFile(templates['child'], templates['tmp_dir'])
+            mdFile = createTemporaryCopy(templates['child'], templates['tmp_dir'])
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             self.assertTrue(isinstance(mdEditor, ChildMetadataBinding), 'Function: testInitChildMetadataBinding - Response is not of type ChildMetadatabinding.')
         except:
@@ -37,7 +37,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = 'Grünheide b. Wilkieten. - Hrsg. 1911, red. Änd. 1939. - 1:25000. - [Berlin]: Reichsamt für Landesaufnahme, 1939. - 1 Kt. ---'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateAbstract(updateValue)
             self.assertTrue(response, 'Function: testUpdateAbstract - Response is not like expected.')
@@ -58,7 +58,7 @@ class TestChildMetadataBinding(unittest.TestCase):
             updateSouthBoundLatValue = 55.49
             updateNorthBoundLatValue = 55.59
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateBoundingBox(updateWestBoundLonValue, updateEastBoundLonValue, updateSouthBoundLatValue, updateNorthBoundLatValue)
             self.assertTrue(response, 'Function: testUpdateBoundingBox - Response is not like expected.')
@@ -93,7 +93,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = datetime.now().isoformat(' ')
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateDateStamp(updateValue)
             self.assertTrue(response, 'Function: testUpdateDateStamp - Response is not like expected.')
@@ -111,7 +111,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = 'Messtischblatt'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateHierarchyLevelName(updateValue)
             self.assertTrue(response, 'Function: testUpdateHierarchyLevelName - Response is not like expected.')
@@ -129,7 +129,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = 'df_dk_0010001_0192'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateId(updateValue)
             self.assertTrue(response, 'Function: testUpdateId - Response is not like expected.')
@@ -147,7 +147,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = 'http://digital.slub-dresden.de/id33592272'            
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updatePermalink(updateValue)
             self.assertTrue(response, 'Function: testUpdatePermalink - Response is not like expected.')
@@ -167,7 +167,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = '1940'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateReferenceDate(updateValue)
             self.assertTrue(response, 'Function: testUpdateReferenceDate - Response is not like expected.')
@@ -188,7 +188,7 @@ class TestChildMetadataBinding(unittest.TestCase):
             startUpdateValue = '1940-01-01'
             endUpdateValue = '1940-12-31'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateReferenceTime(startUpdateValue, endUpdateValue)
             self.assertTrue(response, 'Function: testUpdateReferenceTime - Response is not like expected.')
@@ -215,7 +215,7 @@ class TestChildMetadataBinding(unittest.TestCase):
         try:
             updateValue = 'Meßtischblatt 0495 : Grünheide b. Wilkieten, 19399'
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory)
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory)
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             response = mdEditor.updateTitle(updateValue)
             self.assertTrue(response, 'Function: testTitle - Response is not like expected.')
@@ -232,7 +232,7 @@ class TestChildMetadataBinding(unittest.TestCase):
     def testSaveFile(self):
         try:
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
-            mdFile = createMetadataFile(templates['child'], tmpDirectory, 'xml')
+            mdFile = createTemporaryCopy(templates['child'], tmpDirectory, 'xml')
             mdEditor = ChildMetadataBinding(mdFile, self.logger)
             destFile = os.path.join(templates['tmp_dir'], 'test1')
             response = mdEditor.saveFile(destFile)

@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from src.csw.Namespaces import Namespaces
 from src.csw.ServiceMetadataBinding import appendCoupledResource
 
-class Test(unittest.TestCase):
+class TestServiceMetadataBinding(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):    

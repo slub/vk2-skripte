@@ -1,4 +1,4 @@
-from vkviewer.python.models.Meta import Base
+from src.models.Meta import Base
 from sqlalchemy import Column, Integer, Boolean, String, DateTime, desc
 
 class Georeferenzierungsprozess(Base):
