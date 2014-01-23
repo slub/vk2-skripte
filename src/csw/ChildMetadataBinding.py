@@ -40,6 +40,9 @@ class ChildMetadataBinding(object):
         valueElement.text = value
         return True
     
+    def tostring(self):
+        return ET.tostring(self.root, encoding='utf8', method='xml')
+    
     def saveFile(self, destFile):
         self.tree.write(destFile, encoding="utf-8", xml_declaration=True)
         return destFile

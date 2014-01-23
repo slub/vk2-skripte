@@ -70,7 +70,7 @@ def getMetadataForMesstischblatt(id, db, logger):
                     'temporalExtent_begin': '%s-01-01'%metadata_time.datierung,
                     'temporalExtent_end': '%s-12-31'%metadata_time.datierung,
                     'permalink': metadata_dataset.permalink, 
-                    'hierarchylevel': 'Messtischblatt' if mtb.mdtype == 'M' else 'Äquidistantenkarte' 
+                    'hierarchylevel': 'Messtischblatt' if mtb.mdtype == 'M' else 'Aequidistantenkarte' 
         }
         return metadata
     except:
@@ -91,6 +91,11 @@ def updateMetadata(file, metadata, logger):
         mdEditor.updateDateStamp(metadata['dateStamp'])
         mdEditor.updateReferenceTime(metadata['temporalExtent_begin'], metadata['temporalExtent_end'])
         mdEditor.updateReferenceDate(metadata['cite_date'])
+        
+#         print '============================'
+#         print mdEditor.tostring()
+#         print '============================'
+        
         mdEditor.saveFile(file)
         return True
     except:

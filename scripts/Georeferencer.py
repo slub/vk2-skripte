@@ -140,19 +140,36 @@ if __name__ == '__main__':
     parser.add_argument('-modus', type=str, help='Run in testing or production modus')
     arguments = parser.parse_args()
     
-    
-    if arguments.modus == 'production':
+    georefProcessQueue = None
+    try:
+        georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
+    except GeoreferenceProcessNotFoundError:
+        pass
+        print "There is no georeference process is process quene."   
+           
+    if arguments.modus == 'production' and georefProcessQueue:
         print 'Running script in modus "%s"'%arguments.modus
-        georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
         for process in georefProcessQueue:
-            registerGeoreferenceMesstischblatt(georeference_process = process[0], 
-                messtischblatt = process[1], dbsession = dbsession, logger = logger)
+            if not process[1].isttransformiert:
+                print 'Running georeference process with id %s for messtischblatt %s.'%(process[0].id,process[1].id)
+                registerGeoreferenceMesstischblatt(georeference_process = process[0], 
+                    messtischblatt = process[1], dbsession = dbsession, logger = logger)
+                dbsession.flush()    
+                print 'Georeference process %s was successful'%process[0].id
+            print 'Georeference process %s for messtischblatt %s was already execute.'%(process[0].id,process[1].id) 
+
         dbsession.commit()
-    else:
+    elif georefProcessQueue:
         print 'Running script in modus "Testing"'
-        georefProcessQueue = getGeoreferenceProcess(dbsession, logger)
-        for process in georefProcessQueue:
-            registerGeoreferenceMesstischblatt(georeference_process = process[0], 
-                messtischblatt = process[1], dbsession = dbsession, logger = logger)
- 
-    
+        georefNumber = 0
+        for process in georefProcessQueue:            
+            if not process[1].isttransformiert:
+                print 'Running georeference process with id %s for messtischblatt %s.'%(process[0].id,process[1].id) 
+                registerGeoreferenceMesstischblatt(georeference_process = process[0], 
+                    messtischblatt = process[1], dbsession = dbsession, logger = logger)
+                dbsession.flush()  
+                print 'Georeference process %s was successful'%process[0].id
+                georefNumber += 1
+            print 'Georeference process %s for messtischblatt %s was already execute.'%(process[0].id,process[1].id) 
+                
+        print "Georef Number %s"%georefNumber

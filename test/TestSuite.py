@@ -14,8 +14,6 @@ import unittest, sys, os
 parentPath = os.path.abspath('.')
 sys.path.insert(0, parentPath)
 
-
-
 from test.src.models.TestMeta import TestMeta
 from test.scripts.TestGeoreferencer import TestGeoreferencer
 from test.src.csw.TestChildMetadataBinding import TestChildMetadataBinding

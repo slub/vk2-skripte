@@ -19,19 +19,28 @@ class TestInsertMetadata(unittest.TestCase):
         logging.basicConfig(level=logging.DEBUG)
         cls.logger = logging.getLogger('sqlalchemy.engine')
         cls.dbSession = initializeDb(sqlalchemy_engine)
-        
+    
+    @unittest.skip('testInsertMetadata')    
     def testInsertMetadata(self):
         gn_transaction_delete('df_dk_0010001_0192', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
         response = insertMetadata(id=71051490,db=self.dbSession,logger=self.logger)
         self.assertIsNotNone(response, "InsertMetadata should pass, but fails.")
         gn_transaction_delete('df_dk_0010001_0192', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
-        
+      
+    @unittest.skip('testInsertMetadata_1')   
     def testInsertMetadata_1(self):
         gn_transaction_delete('df_dk_0010001_1116', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
         response = insertMetadata(id=71051613,db=self.dbSession,logger=self.logger)
         self.assertIsNotNone(response, "InsertMetadata should pass, but fails.")
         gn_transaction_delete('df_dk_0010001_1116', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
-       
+
+    def testInsertMetadata_forUmlaute(self):
+        gn_transaction_delete('df_dk_0010001_1116', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
+        response = insertMetadata(id=71055037,db=self.dbSession,logger=self.logger)
+        self.assertIsNotNone(response, "testInsertMetadata_forUmlaute should pass, but fails.")
+        gn_transaction_delete('df_dk_0010001_1116', gn_settings['gn_username'], gn_settings['gn_password'], self.logger)
+    
+    @unittest.skip('testCreateTemporaryCopy')          
     def testCreateTemporaryCopy(self):
         try:
             tmpDirectory = tempfile.mkdtemp('', 'tmp_', templates['tmp_dir'])
@@ -42,7 +51,8 @@ class TestInsertMetadata(unittest.TestCase):
             raise
         finally:
             shutil.rmtree(tmpDirectory)
-        
+    
+    @unittest.skip('testGetMetadataForMesstischblatt')   
     def testGetMetadataForMesstischblatt(self):
         response = getMetadataForMesstischblatt(id=71051490,db=self.dbSession,logger=self.logger)
         self.assertIsNotNone(response, 'Function: testGetMetadataFormesstischblatt - failed because response is none.')

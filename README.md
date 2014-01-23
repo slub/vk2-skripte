@@ -24,3 +24,15 @@ Run Tests
 
 		- ~/path/to/env/bin/python test/TestSuite.py
 
+Georeferencer script
+====================
+This scripts compute a persitent georeference result. It reads the oben georeference processes from the database 
+and computes a georeference result for them. After that it updates the database state and push a metadata record
+for the georeference messtischblatt to a csw geonetwork instance.
+
+The script could be run in testing or in production mode. In case of production mode the update database will run
+with a commit flag.
+
+	../python_env/bin/python Georeferencer.py -modus=production
+
+
