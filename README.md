@@ -35,4 +35,20 @@ with a commit flag.
 
 	../python_env/bin/python Georeferencer.py -modus=production
 
+For correct running in a cronjob environment set in the head of the Georeferencer.py script the following path variable
+
+	sys.path.append('~/path/to/project/vk2-skripte')
+
+
+UpdateMappingService script 
+===========================
+This scripts is controllable via command line. It's update the virtual datasets for the giving timestamps and persist the 
+change in the database. It also could update cache, if wanted. For further help see
+
+../python_env/bin/python UpdateMappingService.py -h
+
+Example command:
+
+../python_env/bin/python UpdateMappingService.py --mode 'slim' --host ... --password '...' --user '...' --db '..' --tmp_dir '.../tmp' '.../tmp'
+
 

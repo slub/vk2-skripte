@@ -1,19 +1,49 @@
-'''
-Created on Nov 18, 2013
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#/******************************************************************************
+# * $Id: UpdateMappingService.py 2014-01-28 jmendt $
+# *
+# * @deprecated: delete > new script is UpdateMappingService
+# * Project:  Virtuelles Kartenforum 2.0
+# * Purpose:  This script encapsulate then tasks which are run for updating the vk2 mapping services. 
+# *           This tasks comprises the update of the web mapping service layer  time_idx (a postgis / virtual 
+# *           dataset - time / tile index) by updating the virtual datasets and the equivalent database table 
+# *           "virtualdatasets" . After that a seeding process for updating the tile cache is run. After the 
+# *           cache is updated the database table "relmtblayer" is updated, so that the wfs layer which represents
+# *           the single messtischblatt data is updated consistent to the viewing data. Before finishing the 
+# *           updating for one timestamp the update data get registered in the database table "virtualdatasets" 
+# *           by insert the update timestamp in the column "lastupdate".
+# * Author:   Jacob Mendt
+# * @todo:    Update boundingbox of virutal dataset
+# *
+# *
+# ******************************************************************************
+# * Copyright (c) 2014, Jacob Mendt
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a
+# * copy of this software and associated documentation files (the "Software"),
+# * to deal in the Software without restriction, including without limitation
+# * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# * and/or sell copies of the Software, and to permit persons to whom the
+# * Software is furnished to do so, subject to the following conditions:
+# *
+# * The above copyright notice and this permission notice shall be included
+# * in all copies or substantial portions of the Software.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# * DEALINGS IN THE SOFTWARE.
+# ****************************************************************************/'''
+import os, sys
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.append(os.path.abspath('.'))
 
-@author: mendt
-
-This script encapsulate then tasks which are run for updating the vk2 mapping services. This tasks comprises the update of the web mapping service layer
- time_idx (a postgis / virtual dataset - time / tile index) by updating the virtual datasets and the equivalent database table "virtualdatasets" . After that a
- seeding process for updating the tile cache is run. After the cache is updated the database table "relmtblayer" is updated, so that the wfs layer which represents 
- the single messtischblatt data is updated consistent to the viewing data. Before finishing the updating for one timestamp the update data get registered in the 
- database table "virtualdatasets" by insert the update timestamp in the column "lastupdate".
-
-@TODO update boundingbox virtualdataset
-'''
 import psycopg2.extras
-import os
-import sys
+
 import subprocess
 import argparse
 from psycopg2 import IntegrityError
@@ -21,6 +51,10 @@ from datetime import datetime
 from settings import params_database, params_gdal, params_mtbs, params_mapcache
 from subprocess import CalledProcessError
 
+query_getUpdateLayerTimestamps = "SELECT * FROM (SELECT mtb.id, mtb.isttransformiert, zeit.datierung FROM messtischblatt as mtb, md_zeit as zeit \
+            WHERE mtb.isttransformiert = TRUE AND mtb.id = zeit.id AND zeit.typ::text = 'a5064'::text) as foo LEFT JOIN refmtblayer as ref ON ref.messtischblatt = foo.id \
+            AND ref.layer = 87 WHERE ref.messtischblatt IS NULL"
+            
 class AbstractDB(object):
 
     def __init__(self, connectionParameter):
@@ -105,7 +139,23 @@ class VrtDB(AbstractDB):
             AND ref.layer = 87 WHERE ref.messtischblatt IS NULL"
         values = []
         return self.__executeSQLQuery__(query, values, 'SELECT') 
+
+def getUpdateLayerTimestamps(dbsession, logger):   
+    """ Looks in the database for which timestamps are new georeference messtischblätter available
     
+    Args:
+        dbsession (sqlalchemy.orm.session.Session): session object for querying the database
+        logger (Logger)
+    Returns:
+        list of timestamps for which a new georeference messtischblätter available.
+    """ 
+    print "log"
+#     dbResponse = 
+#     timestampsForUpdates = []
+#     for record in listOfUpdateRecords:
+#         if not record['datierung'] in timestampsForUpdates:
+#             timestampsForUpdates.append(record['datierung'])
+#     return sorted(timestampsForUpdates, key = int)
        
 class UpdateProcess(object):
     
@@ -158,6 +208,8 @@ class UpdateProcess(object):
             return self.updateStatus
         except CalledProcessError, e:
             pass
+
+
 
 def createVirtualDataset(timestamp):
     shpTilePath = os.path.join(params_gdal['tmp_dir'], (str(timestamp.year)))
@@ -215,8 +267,8 @@ def buildCmd_createShapeTileIndex(timestamp, shp_path):
         FROM messtischblatt as mtb, md_zeit as zeit WHERE mtb.isttransformiert = True \
         AND mtb.id = zeit.id AND zeit.typ::text = 'a5064'::text AND zeit.time = '%(timestamp)s'\""         
     createShapeTileIndexCmd = createShapeTileIndexCmd % (dict({
-        'shp_path': shp_path,
-        'timestamp': str(timestamp) }.items() + params_database.items()))
+        'shp_path': shp_path,                                  
+        'timestamp': str(timestamp) }.items() + .items()))
     return createShapeTileIndexCmd
 
 def buildCmd_createVrt(target_path, shapeTile_path):

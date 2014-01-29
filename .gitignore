@@ -5,6 +5,7 @@
 # files which are holding sensible information
 settings.py
 settings.pyc
+OwnCommands.md
 
 # all files with ending 
 *.pyc

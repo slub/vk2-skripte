@@ -1,4 +1,9 @@
 '''
+Created on Jan 28, 2014
+
+@author: mendt
+'''
+'''
 Created on Nov 18, 2013
 
 @author: mendt
@@ -7,7 +12,7 @@ import unittest
 from psycopg2 import IntegrityError
 from datetime import datetime
 from settings import params_database
-from UpdateMappingServices import VrtDB, createUpdateProcess, UpdateProcess, getActualTimestamp, buildCmd_createShapeTileIndex, createVirtualDataset,getTimestampListForUpdate
+from scripts.UpdateMappingServices import VrtDB, createUpdateProcess, UpdateProcess, getActualTimestamp, buildCmd_createShapeTileIndex, createVirtualDataset,getTimestampListForUpdate
 from subprocess import CalledProcessError
 
 class TestUpdateProcess(unittest.TestCase):
