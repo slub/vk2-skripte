@@ -8,7 +8,7 @@ Created on Jan 9, 2014
 import logging, shutil, sys, tempfile, uuid, os
 from datetime import datetime
 from settings import sqlalchemy_engine
-from settings import templates, gn_settings
+from settings import templates, gn_settings, srid_database
 from src.csw.ChildMetadataBinding import ChildMetadataBinding
 from src.csw.CswTransactionBinding import gn_transaction_insert, gn_transaction_delete
 from src.models.Meta import initializeDb
@@ -63,14 +63,34 @@ def getMetadataForMesstischblatt(id, db, logger):
                     'southBoundLatitude':str(mtb.BoundingBoxObj.llc.y),
                     'northBoundLatitude':str(mtb.BoundingBoxObj.urc.y),
                     'identifier':mtb.dateiname,
-                    'dateStamp': datetime.now().isoformat(' '),
+                    'dateStamp': datetime.now().strftime('%Y-%m-%d'),
                     'title': metadata_core.titel,
                     'cite_date': str(metadata_time.datierung),
                     'abstract': metadata_core.beschreibung,
                     'temporalExtent_begin': '%s-01-01'%metadata_time.datierung,
                     'temporalExtent_end': '%s-12-31'%metadata_time.datierung,
                     'permalink': metadata_dataset.permalink, 
-                    'hierarchylevel': 'Messtischblatt' if mtb.mdtype == 'M' else 'Aequidistantenkarte' 
+                    'hierarchylevel': 'Messtischblatt' if mtb.mdtype == 'M' else 'Aequidistantenkarte', 
+                    'wms_params': {
+                        'westBoundLongitude':str(mtb.BoundingBoxObj.llc.x),
+                        'southBoundLatitude':str(mtb.BoundingBoxObj.llc.y),
+                        'eastBoundLongitude':str(mtb.BoundingBoxObj.urc.x),
+                        'northBoundLatitude':str(mtb.BoundingBoxObj.urc.y),
+                        'srid':srid_database,
+                        'time':metadata_time.datierung,
+                        'width':256,
+                        'height':256
+                    },
+                    'wms_overview': {
+                        'westBoundLongitude':str(mtb.BoundingBoxObj.llc.x),
+                        'southBoundLatitude':str(mtb.BoundingBoxObj.llc.y),
+                        'eastBoundLongitude':str(mtb.BoundingBoxObj.urc.x),
+                        'northBoundLatitude':str(mtb.BoundingBoxObj.urc.y),
+                        'srid':srid_database,
+                        'time':metadata_time.datierung,
+                        'width':256,
+                        'height':256
+                    }
         }
         return metadata
     except:
@@ -91,10 +111,12 @@ def updateMetadata(file, metadata, logger):
         mdEditor.updateDateStamp(metadata['dateStamp'])
         mdEditor.updateReferenceTime(metadata['temporalExtent_begin'], metadata['temporalExtent_end'])
         mdEditor.updateReferenceDate(metadata['cite_date'])
+        mdEditor.updateWMSLink(metadata['wms_params'])
+        mdEditor.updateGraphicOverview(metadata['wms_overview'])
         
-#         print '============================'
-#         print mdEditor.tostring()
-#         print '============================'
+        print '============================'
+        print mdEditor.tostring()
+        print '============================'
         
         mdEditor.saveFile(file)
         return True

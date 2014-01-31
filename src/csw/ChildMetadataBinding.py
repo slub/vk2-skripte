@@ -6,7 +6,8 @@ Created on Jan 9, 2014
 import xml.etree.ElementTree as ET
 import copy
 from src.csw.Namespaces import Namespaces
-
+from settings import ogc_service 
+ 
 class ChildMetadataBinding(object):
     '''
     This class encapsulate the functions which are bind to a metadata template document for a messtischblatt. 
@@ -110,7 +111,23 @@ class ChildMetadataBinding(object):
         except:
             self.logger.error('Problems while updating the <gmd:dateStamp> with value %s.'%value)
             raise
-        
+
+    def updateGraphicOverview(self, wms_params):
+        try: 
+            self.logger.debug('Update <gmd:graphicOverview')
+            xmlHierarchy = [self.ns['gmd']+'identificationInfo', 
+                             self.ns['gmd']+'MD_DataIdentification',
+                             self.ns['gmd']+'graphicOverview', 
+                             self.ns['gmd']+'MD_BrowseGraphic',
+                             self.ns['gmd']+'fileName', 
+                             self.ns['gco']+'CharacterString']
+           
+            value = ogc_service['wms_template']%(wms_params) 
+            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))     
+            return True
+        except:
+            self.logger.error('Problems while updating the <gmd:MD_DigitalTransferOptions> with params %s.'%wms_params)
+            raise  
     def updateHierarchyLevelName(self, value):
         try:
             self.logger.debug('Update <gmd:hierarchyLevelName> with value %s.'%value)
@@ -144,7 +161,8 @@ class ChildMetadataBinding(object):
                              self.ns['gmd']+'CI_OnlineResource',
                              self.ns['gmd']+'linkage',
                              self.ns['gmd']+'URL']
-            self.__changeSingleElement__(value, '/'.join(xmlHierarchy))
+            valueElement = self.root.findall('/'.join(xmlHierarchy))[1]
+            valueElement.text = value
             return True
         except:
             self.logger.error('Problems while updating the <gmd:MD_DigitalTransferOptions> with value %s.'%value)
@@ -189,25 +207,57 @@ class ChildMetadataBinding(object):
                              self.ns['gmd']+'MD_DataIdentification',
                              self.ns['gmd']+'extent',
                              self.ns['gmd']+'EX_Extent',
-                             self.ns['gmd']+'temporalElement',
-                             self.ns['gmd']+'EX_TemporalExtent',
-                             self.ns['gmd']+'extent',
-                             self.ns['gml']+'TimePeriod']            
-            # set begin
-            beginPeriodHierarchy = copy.deepcopy(xmlHierarchy)
-            beginPeriodHierarchy.extend([self.ns['gml']+'begin',
-                            self.ns['gml']+'TimeInstant',
-                            self.ns['gml']+'timePosition'])
-            self.__changeSingleElement__(startValue,'/'.join(beginPeriodHierarchy))
+                             ]            
+            
+            # because of multiple children of <gmd:EX_Extent> this methode has to be modified.
+            rootElement = self.root.findall('/'.join(xmlHierarchy))
+            for element in rootElement:
+                # set begin
+                beginPeriodHierarchy = [self.ns['gmd']+'temporalElement',
+                                 self.ns['gmd']+'EX_TemporalExtent',
+                                 self.ns['gmd']+'extent',
+                                 self.ns['gml']+'TimePeriod',
+                                 self.ns['gml']+'begin',
+                                self.ns['gml']+'TimeInstant',
+                                self.ns['gml']+'timePosition']
+            
+                valueElement = element.find('/'.join(beginPeriodHierarchy))
+                if valueElement:
+                    valueElement.text = startValue
                 
-            # set end
-            endPeriodHierarchy = copy.deepcopy(xmlHierarchy)
-            endPeriodHierarchy.extend([self.ns['gml']+'end',
-                            self.ns['gml']+'TimeInstant',
-                            self.ns['gml']+'timePosition'])
-            self.__changeSingleElement__(endValue,'/'.join(endPeriodHierarchy))
+                # set end
+                endPeriodHierarchy = [self.ns['gmd']+'temporalElement',
+                                 self.ns['gmd']+'EX_TemporalExtent',
+                                 self.ns['gmd']+'extent',
+                                 self.ns['gml']+'TimePeriod',
+                                 self.ns['gml']+'end',
+                                self.ns['gml']+'TimeInstant',
+                                self.ns['gml']+'timePosition']
+                valueElement1 = element.find('/'.join(beginPeriodHierarchy))
+                if valueElement1:
+                    valueElement1.text = endValue
             return True
         except:  
             self.logger.error('Problems while updating the <gmd:extent> with startValue %s and endValue %s.'%(startValue, endValue))    
             raise      
+        
+    def updateWMSLink(self, wms_params):
+        try: 
+            self.logger.debug('Update <gmd:MD_DigitalTransferOptions')
+            xmlHierarchy = [self.ns['gmd']+'distributionInfo', 
+                             self.ns['gmd']+'MD_Distribution',
+                             self.ns['gmd']+'transferOptions',
+                             self.ns['gmd']+'MD_DigitalTransferOptions',
+                             self.ns['gmd']+'onLine',
+                             self.ns['gmd']+'CI_OnlineResource',
+                             self.ns['gmd']+'linkage',
+                             self.ns['gmd']+'URL']
+           
+            value = ogc_service['wms_template']%(wms_params)      
+            valueElement = self.root.findall('/'.join(xmlHierarchy))[1]
+            valueElement.text = value 
+            return True
+        except:
+            self.logger.error('Problems while updating the <gmd:MD_DigitalTransferOptions> with params %s.'%wms_params)
+            raise
                     
