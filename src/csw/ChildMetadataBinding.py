@@ -161,7 +161,7 @@ class ChildMetadataBinding(object):
                              self.ns['gmd']+'CI_OnlineResource',
                              self.ns['gmd']+'linkage',
                              self.ns['gmd']+'URL']
-            valueElement = self.root.findall('/'.join(xmlHierarchy))[1]
+            valueElement = self.root.findall('/'.join(xmlHierarchy))[0]
             valueElement.text = value
             return True
         except:
