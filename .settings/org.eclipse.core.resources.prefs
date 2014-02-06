@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//scripts/FixMesstischblattDB.py=utf-8
 encoding//scripts/GetZoomifyProperties.py=utf-8
 encoding//scripts/Messtischblattdb_ParseMtbTitelShort.py=utf-8
 encoding//scripts/UpdateArchivpfadVk2.py=utf-8
