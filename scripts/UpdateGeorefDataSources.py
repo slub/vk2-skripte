@@ -325,7 +325,7 @@ def processUpdateProcessForTimestamp(messtischblatt_process_queue, time, dbsessi
         destPath = computeGeoreferenceResult(georeference_process, messtischblatt, dbsession, logger)
         updateDatabase(destPath, messtischblatt, dbsession, logger)
     
-    # now update the cache backend
+    # now update the virtual datasets and the cache backend
     vrt = Virtualdatasets.by_timestamp('1919-01-01 00:00:00', dbsession)
     updateVrt( PARAMS_DATABASE, refresh_cache = True, logger = logger, dbsession = dbsession, vrt = vrt)
     
@@ -336,6 +336,7 @@ def processUpdateProcessForTimestamp(messtischblatt_process_queue, time, dbsessi
     
     logger.info('Update process for timestamp %s finished.'%time)
 
+""" Scritp Functions """
 def scriptUpdateCacheMode(startTime, endTime, logger):
     """ This function makes a complete reseed of the cache for the given time range.
     
@@ -351,6 +352,11 @@ def scriptUpdateCacheMode(startTime, endTime, logger):
     logger.info('Finish reseeding cache.')
     
 def scriptProductionMode(arguments, logger):
+    """ This function runs the script in production or testing mode
+    
+        Arguments:
+            arguments {*args}
+            logger {Logger} """
     logger.info('Initialize database connection ...')
     
     # init database
@@ -383,7 +389,8 @@ def scriptProductionMode(arguments, logger):
         for key in georefProcessQueue:
             processUpdateProcessForTimestamp(georefProcessQueue[key], key, dbsession, logger)
         logger.info('Finish running script in production mode')  
-    
+
+""" Main """    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'This scripts handles the updating of the datasources of the Virtuelles Kartenforum 2.0. It could \
         process persistent georeference mtbs, publish metadata records, update the virtual datasets and reseeding the cache. If wantet it could also be used \
