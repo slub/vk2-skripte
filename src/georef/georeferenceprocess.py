@@ -9,9 +9,6 @@ from src.georef.georeferenceexceptions import GeoreferenceParameterError, Georef
 from src.georef.utils import getTimestampAsPGStr, runCommand
 from src.georef.georeferenceutils import getGCPsAsString, addGCPToTiff, georeferenceTiff_stable, georeferenceTiff_fast, addOverviews
 from settings import srid_database, georef_settings
-
-import shutil
-import tempfile
 import os
 
 def parsePixelCoordinates(clippingParameter):
